@@ -1,15 +1,14 @@
 import
-  nigui,
-  nigui/msgbox,
-  std/os,
-  ./info,
-  ./utils
+  nigui
 
 ##################################
 # Definition #####################
 ##################################
 type
   Skin = ref object
+    name: string
+    ext: string
+    path: string
     ui: LayoutContainer
     checkBox: Checkbox
     skinNameLabel: Label
@@ -22,10 +21,19 @@ type
   ContainsSkinfile = ref object of Application
     skinfileUi: LayoutContainer # 画面左側UI
     skinfiles: seq[Skin]
+    isSelectedSeq: seq[Skin]
 
   ToolWindow = ref object of ContainsSkinfile
     changeButton: Button
     cancelButton: Button
+
+  ChangeCursorWindow = ref object of ToolWindow
+
+  ChangeHitSoundWindow = ref object of ToolWindow
+
+  AddCursorWindow = ref object of ToolWindow
+
+  AddHitSoundWindow = ref object of ToolWindow
 
   SettingWindow = ref object of Application
     changePathUi: LayoutContainer # パス変更UI
@@ -48,10 +56,10 @@ type
     addHitSoundButton: Button
     settingButton: Button
 
-    changeCursor: ToolWindow
-    changeHitSound: ToolWindow
-    addCursor: ToolWindow
-    addHitSound: ToolWindow
+    changeCursor: ChangeCursorWindow
+    changeHitSound: ChangeHitSoundWindow
+    addCursor: AddCursorWindow
+    addHitSound: AddHitSoundWindow
     setting: SettingWindow
 
 proc newApp(self: MainWindow): void
