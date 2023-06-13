@@ -112,6 +112,27 @@ method showWindow(self:Application): void =
     return
   self.window.visible = true
 
+##################################
+# Implementation - Controls ######
+##################################
+method setControls(self:MainWindow): void =
+  self.rightUi = newLayoutContainer(Layout_Vertical)
+  self.topUi = newLayoutContainer(Layout_Vertical)
+  self.changeCursorButton = newButton("Change Cursor")
+  self.changeHitSoundButton = newButton("Change HitSound")
+  self.bottomUi = newLayoutContainer(Layout_Vertical)
+  self.addCursorButton = newButton("Add Cursor")
+  self.addHitSoundButton = newButton("Add HitSound")
+  self.settingButton = newButton("Settings")
+
+  self.ui.add(self.rightUi)
+  self.rightUi.add(self.topUi)
+  self.topUi.add(self.changeCursorButton)
+  self.topUi.add(self.changeHitSoundButton)
+  self.rightUi.add(self.bottomUi)
+  self.bottomUi.add(self.addCursorButton)
+  self.bottomUi.add(self.addHitSoundButton)
+  self.bottomUi.add(self.settingButton)
 
 
 when isMainModule:
