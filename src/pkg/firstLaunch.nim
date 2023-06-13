@@ -45,7 +45,7 @@ proc setControls(self:FirstLaunchWindow): void =
   let
     next: string = "next"
     previous: string = "previous"
-  self.footerUi = newLayoutContainer(Layout_Vertical)
+  self.footerUi = newLayoutContainer(Layout_Horizontal)
   self.welcomeNextButton = newButton(next)
   self.exitButton = newButton("exit")
   self.selectLangPreviousButton = newButton(previous)
@@ -55,6 +55,7 @@ proc setControls(self:FirstLaunchWindow): void =
   self.completionPreviousButton = newButton(previous)
   self.completionButton = newButton("finish")
 
+  self.window.add(self.bodyUi)
   self.ui.add(self.headerUi)
   self.headerUi.add(self.welcomeLabel)
   self.ui.add(self.bodyUi)

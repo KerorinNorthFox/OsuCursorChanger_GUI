@@ -1,6 +1,5 @@
 import
   nigui,
-  std/os,
   ./info,
   ./utils,
   ./firstLaunch
@@ -93,7 +92,7 @@ proc main(): void =
 
 # アプリケーション作成
 proc newApp(self:MainWindow): void =
-  self.createWindow("OsuCursorChanger GUI"&VERSION, 500, 800)
+  self.createWindow("OsuCursorChanger GUI - "&VERSION, 500, 800)
   let height: int = 500
   let width: int = 800
   self.changeCursor = ChangeCursorWindow(isShowed:false)
@@ -106,6 +105,8 @@ proc newApp(self:MainWindow): void =
   self.addHitSound.createWindow("Add HitSound", height, width)
   self.setting = SettingWindow(isShowed:false)
   self.setting.createWindow("Settings", 300, 400)
+
+  self.setControls()
 
 # ウィンドウ作成
 method createWindow(self:Application, title:string="", height:int=100, width:int=100): void =
@@ -125,6 +126,9 @@ method showWindow(self:Application): void =
 # Implementation - Controls ######
 ##################################
 method setControls(self:MainWindow): void =
+  self.ui = newLayoutContainer(Layout_Horizontal)
+  
+  self.skinfileUi = newLayoutContainer(Layout_Vertical)
   self.rightUi = newLayoutContainer(Layout_Vertical)
   self.topUi = newLayoutContainer(Layout_Vertical)
   self.changeCursorButton = newButton("Change Cursor")
@@ -134,6 +138,8 @@ method setControls(self:MainWindow): void =
   self.addHitSoundButton = newButton("Add HitSound")
   self.settingButton = newButton("Settings")
 
+  self.window.add(self.ui)
+  self.ui.add(self.skinfileUi)
   self.ui.add(self.rightUi)
   self.rightUi.add(self.topUi)
   self.topUi.add(self.changeCursorButton)
