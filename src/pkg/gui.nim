@@ -1,6 +1,9 @@
 import
   nigui,
-  ./info
+  std/os,
+  ./info,
+  ./utils,
+  ./firstLaunch
 
 ##################################
 # Definition #####################
@@ -80,6 +83,12 @@ var
 proc main(): void =
   app.init()
   application.newApp()
+  application.showWindow()
+  # 初回起動の時の処理
+  if loadIsFirstLaunch() == 0:
+    var firstLaunch: FirstLaunchWindow = FirstLaunchWindow()
+    firstLaunch.newApp()
+    updateIsFirstLaunch(1)
   app.run()
 
 # アプリケーション作成

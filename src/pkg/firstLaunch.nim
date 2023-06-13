@@ -75,3 +75,5 @@ proc newApp*(self:FirstLaunchWindow): void =
 
   self.setControls()
   self.setEvents()
+
+  self.window.show()
