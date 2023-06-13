@@ -1,5 +1,6 @@
 import
   nigui,
+  nigui/msgBox,
   ./info,
   ./utils,
   ./firstLaunch
@@ -72,6 +73,8 @@ method createWindow(self:Application, title:string="", height:int=100, width:int
 method showWindow(self:Application): void {.base.}
 method setControls(self:Application): void {.base.} =
   self.ui = newLayoutContainer(Layout_Horizontal)
+method setEvents(self:Application): void {.base.} =
+  self.window.onCloseClick = proc(event: CloseClickEvent) = discard
 
 ##################################
 # Implementation #################
@@ -198,6 +201,30 @@ method setControls(self:SettingWindow): void =
   self.ui.add(self.changeLangUi)
   self.changeLangUi.add(self.comboBox)
   self.changeLangUi.add(self.saveLangButton)
+
+##################################
+# Implementation - Event Handler #
+##################################
+method setEvents(self:MainWindow): void =
+  self.window.onCloseClick = proc(event: CloseClickEvent) =
+    case self.window.msgBox("Quit?", "Quit the applciation", "Quit", "Cancel")
+    of 1: app.quit()
+    else: discard
+
+method setEvents(self:ChangeCursorWindow): void =
+  discard
+
+method setEvents(self:ChangeHitSoundWindow): void =
+  discard
+
+method setEvents(self:AddCursorWindow): void =
+  discard
+
+method setEvents(self:AddHitSoundWindow): void =
+  discard
+
+method setEvents(self:SettingWindow): void =
+  discard
 
 when isMainModule:
   main()
