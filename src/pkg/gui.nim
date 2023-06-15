@@ -88,7 +88,7 @@ proc main(): void =
   app.init()
   application.newApp()
   application.showWindow()
-  # application.changeCursor.showWindow()
+  application.changeCursor.showWindow()
   application.setting.showWindow()
   # 初回起動の時の処理
   if loadIsFirstLaunch() == 0:
@@ -148,6 +148,7 @@ method setControls(self:MainWindow): void =
   self.skinfileUi = newLayoutContainer(Layout_Vertical)
   self.skinfileUi.widthMode = WidthMode_Expand
   self.skinfileUi.heightMode = HeightMode_Expand
+  self.skinfileUi.frame = newFrame()
 
   self.rightUi = newLayoutContainer(Layout_Vertical)
   self.rightUi.heightMode = HeightMode_Expand
@@ -210,6 +211,7 @@ method setControls(self:ToolWindow): void =
   self.skinfileUi = newLayoutContainer(Layout_Vertical)
   self.skinfileUi.heightMode = HeightMode_Expand
   self.skinfileUi.widthMode = WidthMode_Expand
+  self.skinfileUi.frame = newFrame()
 
   self.buttonUi = newLayoutContainer(Layout_Horizontal)
   self.buttonUi.height = 60
