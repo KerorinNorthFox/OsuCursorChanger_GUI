@@ -95,7 +95,6 @@ proc main(): void =
     var firstLaunch: FirstLaunchWindow = FirstLaunchWindow()
     firstLaunch.newApp()
     firstLaunch.window.showModal(application.window)
-    # updateIsFirstLaunch(1)
   app.run()
 
 # アプリケーション作成

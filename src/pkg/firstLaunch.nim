@@ -1,6 +1,10 @@
 import
   nigui,
-  nigui/msgBox
+  nigui/msgBox,
+  std/sugar,
+  std/strutils,
+  ./utils,
+  ./lang
 
 type
   FirstLaunchWindow* = ref object
@@ -29,6 +33,8 @@ type
     completionPreviousButton: Button
     completionButton: Button
 
+    selectedLang: int
+
 proc setControls(self:FirstLaunchWindow): void =
   const
     uiHeight: int = 50
@@ -42,11 +48,11 @@ proc setControls(self:FirstLaunchWindow): void =
   self.headerUi.widthMode = WidthMode_Expand
   self.headerUi.padding = 20
 
-  self.welcomeLabel = newLabel("Thank you for installing")
+  self.welcomeLabel = newLabel("Thank you for installing!!")
   self.welcomeLabel.widthMode = WidthMode_Expand
   self.welcomeLabel.fontSize = labelFontSize
 
-  self.selectLangLabel = newLabel("Change the language")
+  self.selectLangLabel = newLabel("Change the language (Recommend restart)")
   self.selectLangLabel.widthMode = WidthMode_Expand
   self.selectLangLabel.fontSize = labelFontSize
 
@@ -63,7 +69,10 @@ proc setControls(self:FirstLaunchWindow): void =
   self.bodyUi.widthMode = WidthMode_Expand
   self.bodyUi.xAlign = XAlign_Center
 
-  self.selectLangComboBox = newComboBox()
+  let langSeq = collect(newSeq):
+    for lang in LANG: lang.language
+  self.selectLangComboBox = newComboBox(langSeq)
+  self.selectLangComboBox.width = 200
 
   self.referOsuDirUi = newLayoutContainer(Layout_Horizontal)
   self.referOsuDirUi.widthMode = WidthMode_Expand
@@ -123,6 +132,8 @@ proc setControls(self:FirstLaunchWindow): void =
   self.ui.add(self.footerUi)
   self.footerUi.add(self.exitButton)
   self.footerUi.add(self.welcomeNextButton)
+
+  self.selectedLang = 0
 
   self.window.minHeight = 205
   self.window.minWidth = 350
@@ -192,11 +203,23 @@ proc setEvents(self:FirstLaunchWindow): void =
   self.welcomeNextButton.onClick = proc(event: ClickEvent) =
     self.switchUi(1, "next")
 
+  self.selectLangComboBox.onChange = proc(event: ComboBoxChangeEvent) =
+    let value: int = self.selectLangComboBox.index
+    self.selectedLang = value
+
   self.selectLangPreviousButton.onClick = proc(event: ClickEvent) =
     self.switchUi(2, "previous")
 
   self.selectLangNextButton.onClick = proc(event: ClickEvent) =
     self.switchUi(2, "next")
+
+  self.referOsuDirButton.onClick = proc(event: ClickEvent) =
+    var dialog = SelectDirectoryDialog()
+    dialog.title = "Select osu! folder."
+    dialog.run()
+    if dialog.selectedDirectory == "":
+      return
+    self.pathTextBox.text = dialog.selectedDirectory
 
   self.referOsuDirPreviousButton.onClick = proc(event: ClickEvent) =
     self.switchUi(3, "previous")
@@ -208,6 +231,16 @@ proc setEvents(self:FirstLaunchWindow): void =
     self.switchUi(4, "previous")
 
   self.completionButton.onClick = proc(event: ClickEvent) =
+    let osuDirPath: string = self.pathTextBox.text
+    if osuDirPath == "":
+      self.window.msgBox("osu! folder path is empty.", "Error", "OK")
+      return
+    elif not osuDirPath.contains("osu!"):
+      self.window.msgBox("The selected folder is not osu! folder ", "Error", "OK")
+      return
+    updateLangMode(self.selectedLang)
+    updatePath(osuDirPath)
+    updateIsFirstLaunch(1)
     self.window.dispose()
 
   self.window.onCloseClick = proc(event: CloseClickEvent) =
@@ -219,7 +252,7 @@ proc newApp*(self: FirstLaunchWindow): void =
   let
     height: int = 205
     width: int = 350
-  self.window = newWindow("Set up")
+  self.window = newWindow("Setup")
   self.window.height = height
   self.window.width = width
 
