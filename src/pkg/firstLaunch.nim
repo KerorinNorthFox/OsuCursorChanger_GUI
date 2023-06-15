@@ -1,5 +1,6 @@
 import
-  nigui
+  nigui,
+  nigui/msgBox
 
 type
   FirstLaunchWindow* = ref object
@@ -144,7 +145,7 @@ proc switchUi(self:FirstLaunchWindow, nowUi:int, button:string): void =
       self.footerUi.remove(self.referOsuDirNextButton)
       self.footerUi.add(self.selectLangPreviousButton)
       self.footerUi.add(self.selectLangNextButton)
-    elif nowUi == 4:
+    elif nowUi == 4: #
       self.headerUi.remove(self.completionLabel)
       self.headerUi.add(self.referOsuDirLabel)
       self.bodyUi.add(self.referOsuDirUi)
@@ -161,7 +162,7 @@ proc switchUi(self:FirstLaunchWindow, nowUi:int, button:string): void =
       self.footerUi.remove(self.welcomeNextButton)
       self.footerUi.add(self.selectLangPreviousButton)
       self.footerUi.add(self.selectLangNextButton)
-    elif nowUi == 2:
+    elif nowUi == 2: #
       self.headerUi.remove(self.selectLangLabel)
       self.headerUi.add(self.referOsuDirLabel)
       self.bodyUi.remove(self.selectLangComboBox)
@@ -172,7 +173,7 @@ proc switchUi(self:FirstLaunchWindow, nowUi:int, button:string): void =
       self.footerUi.add(self.referOsuDirNextButton)
     elif nowUi == 3:
       self.headerUi.remove(self.referOsuDirLabel)
-      self.headerUi.remove(self.completionLabel)
+      self.headerUi.add(self.completionLabel)
       self.bodyUi.remove(self.referOsuDirUi)
       self.footerUi.remove(self.referOsuDirPreviousButton)
       self.footerUi.remove(self.referOsuDirNextButton)
@@ -180,7 +181,36 @@ proc switchUi(self:FirstLaunchWindow, nowUi:int, button:string): void =
       self.footerUi.add(self.completionButton)
 
 proc setEvents(self:FirstLaunchWindow): void =
-  discard
+  self.exitButton.onClick = proc(event: ClickEvent) =
+    case self.window.msgBox("Attention", "Do you exit the setup sequence?", "Exit", "Cancel")
+      of 1: app.quit()
+      else: discard
+
+  self.welcomeNextButton.onClick = proc(event: ClickEvent) =
+    self.switchUi(1, "next")
+
+  self.selectLangPreviousButton.onClick = proc(event: ClickEvent) =
+    self.switchUi(2, "previous")
+
+  self.selectLangNextButton.onClick = proc(event: ClickEvent) =
+    self.switchUi(2, "next")
+
+  self.referOsuDirPreviousButton.onClick = proc(event: ClickEvent) =
+    self.switchUi(3, "previous")
+
+  self.referOsuDirNextButton.onClick = proc(event: ClickEvent) =
+    self.switchUi(3, "next")
+
+  self.completionPreviousButton.onClick = proc(event: ClickEvent) =
+    self.switchUi(4, "previous")
+
+  self.completionButton.onClick = proc(event: ClickEvent) =
+    self.window.dispose()
+
+  self.window.onCloseClick = proc(event: CloseClickEvent) =
+    case self.window.msgBox("Do you exit the setup sequence?", "Attention", "Exit", "Cancel")
+      of 1: app.quit()
+      else: discard
 
 proc newApp*(self:FirstLaunchWindow): void =
   let
