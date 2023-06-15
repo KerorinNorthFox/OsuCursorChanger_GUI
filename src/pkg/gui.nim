@@ -198,6 +198,9 @@ method setControls(self:MainWindow): void =
   self.skinfiles = @[]
   self.isSelectedSeq = @[]
 
+  self.window.minHeight = 300
+  self.window.minWidth = 600
+
 
 method setControls(self:ToolWindow): void =
   const buttonWidth: int = 100
@@ -231,6 +234,8 @@ method setControls(self:ToolWindow): void =
   self.isShowed = false
   self.skinfiles = @[]
   self.isSelectedSeq = @[]
+
+  self.window.resizable = false
 
 method setControls(self:SettingWindow): void =
   self.ui = newLayoutContainer(Layout_Vertical)
@@ -275,6 +280,8 @@ method setControls(self:SettingWindow): void =
   self.changeLangUi.add(self.comboBox)
   self.changeLangUi.add(self.saveLangUi)
   self.saveLangUi.add(self.saveLangButton)
+
+  self.window.resizable = false
 
 ##################################
 # Implementation - Event Handler #
