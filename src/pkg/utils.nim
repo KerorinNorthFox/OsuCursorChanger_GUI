@@ -50,19 +50,21 @@ proc loadLangMode(): int =
 let LANGMODE*: int = loadLangMode()
 
 # config.iniの[LANGUAGE]のmodeのupdate
-proc updateLangMode(mode:int): int =
+proc updateLangMode*(mode:int): void =
+  let mode: int = mode
   var dict: Config = loadConfig(CONFIGPATH)
   dict.setSectionKey("LANGUAGE", "mode", $mode)
   dict.writeConfig(CONFIGPATH)
 
 # config.iniの[PATH]のpathの取得
-proc loadPath(): string =
+proc loadPath*(): string =
   var dict: Config = loadConfig(CONFIGPATH)
   let path = dict.getSectionValue("PATH", "path")
   return path
 
 # config.iniの[PATH]のpathのupdate
-proc updatePath(path:string): void =
+proc updatePath*(path:string): void =
+  let path: string = path
   var dict: Config = loadConfig(CONFIGPATH)
   dict.setSectionKey("PATH", "path", path)
   dict.writeConfig(CONFIGPATH)

@@ -55,7 +55,7 @@ type
     saveLangButton: Button
 
   MainWindow = ref object of ContainsSkinfile
-    rightUi: LayoutContainer # 画面右側UI
+    menuUi: LayoutContainer # 画面右側UI
     topUi: LayoutContainer # 上側UI
     changeCursorButton: Button
     changeHitSoundButton: Button
@@ -89,12 +89,12 @@ proc main(): void =
   application.newApp()
   application.showWindow()
   # application.changeCursor.showWindow()
-  application.setting.showWindow()
+  # application.setting.showWindow()
   # 初回起動の時の処理
   if loadIsFirstLaunch() == 0:
     var firstLaunch: FirstLaunchWindow = FirstLaunchWindow()
     firstLaunch.newApp()
-    updateIsFirstLaunch(1)
+    firstLaunch.window.showModal(application.window)
   app.run()
 
 # アプリケーション作成
@@ -148,11 +148,12 @@ method setControls(self:MainWindow): void =
   self.skinfileUi = newLayoutContainer(Layout_Vertical)
   self.skinfileUi.widthMode = WidthMode_Expand
   self.skinfileUi.heightMode = HeightMode_Expand
+  self.skinfileUi.frame = newFrame()
 
-  self.rightUi = newLayoutContainer(Layout_Vertical)
-  self.rightUi.heightMode = HeightMode_Expand
-  self.rightUi.width = 150
-  self.rightUi.xAlign = XAlign_Center
+  self.menuUi = newLayoutContainer(Layout_Vertical)
+  self.menuUi.heightMode = HeightMode_Expand
+  self.menuUi.width = 150
+  self.menuUi.xAlign = XAlign_Center
 
   self.topUi = newLayoutContainer(Layout_Vertical)
   self.topUi.widthMode = WidthMode_Expand
@@ -185,11 +186,11 @@ method setControls(self:MainWindow): void =
 
   self.window.add(self.ui)
   self.ui.add(self.skinfileUi)
-  self.ui.add(self.rightUi)
-  self.rightUi.add(self.topUi)
+  self.ui.add(self.menuUi)
+  self.menuUi.add(self.topUi)
   self.topUi.add(self.changeCursorButton)
   self.topUi.add(self.changeHitSoundButton)
-  self.rightUi.add(self.bottomUi)
+  self.menuUi.add(self.bottomUi)
   self.bottomUi.add(self.addCursorButton)
   self.bottomUi.add(self.addHitSoundButton)
   self.bottomUi.add(self.settingButton)
@@ -198,6 +199,8 @@ method setControls(self:MainWindow): void =
   self.skinfiles = @[]
   self.isSelectedSeq = @[]
 
+  self.window.minHeight = 300
+  self.window.minWidth = 600
 
 method setControls(self:ToolWindow): void =
   const buttonWidth: int = 100
@@ -207,6 +210,7 @@ method setControls(self:ToolWindow): void =
   self.skinfileUi = newLayoutContainer(Layout_Vertical)
   self.skinfileUi.heightMode = HeightMode_Expand
   self.skinfileUi.widthMode = WidthMode_Expand
+  self.skinfileUi.frame = newFrame()
 
   self.buttonUi = newLayoutContainer(Layout_Horizontal)
   self.buttonUi.height = 60
@@ -231,6 +235,8 @@ method setControls(self:ToolWindow): void =
   self.isShowed = false
   self.skinfiles = @[]
   self.isSelectedSeq = @[]
+
+  self.window.resizable = false
 
 method setControls(self:SettingWindow): void =
   self.ui = newLayoutContainer(Layout_Vertical)
@@ -275,6 +281,8 @@ method setControls(self:SettingWindow): void =
   self.changeLangUi.add(self.comboBox)
   self.changeLangUi.add(self.saveLangUi)
   self.saveLangUi.add(self.saveLangButton)
+
+  self.window.resizable = false
 
 ##################################
 # Implementation - Event Handler #
