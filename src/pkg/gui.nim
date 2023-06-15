@@ -94,6 +94,7 @@ proc main(): void =
   if loadIsFirstLaunch() == 0:
     var firstLaunch: FirstLaunchWindow = FirstLaunchWindow()
     firstLaunch.newApp()
+    firstLaunch.window.showModal(application.window)
     # updateIsFirstLaunch(1)
   app.run()
 

@@ -4,7 +4,7 @@ import
 
 type
   FirstLaunchWindow* = ref object
-    window: Window
+    window*: Window
     ui: LayoutContainer
 
     headerUi: LayoutContainer
@@ -124,6 +124,9 @@ proc setControls(self:FirstLaunchWindow): void =
   self.footerUi.add(self.exitButton)
   self.footerUi.add(self.welcomeNextButton)
 
+  self.window.minHeight = 205
+  self.window.minWidth = 350
+
 proc switchUi(self:FirstLaunchWindow, nowUi:int, button:string): void =
   assert(nowUi<=4, "invalid 'ui' argument")
   assert(button=="previous" or button=="next", "invalid 'button' argument")
@@ -145,7 +148,7 @@ proc switchUi(self:FirstLaunchWindow, nowUi:int, button:string): void =
       self.footerUi.remove(self.referOsuDirNextButton)
       self.footerUi.add(self.selectLangPreviousButton)
       self.footerUi.add(self.selectLangNextButton)
-    elif nowUi == 4: #
+    elif nowUi == 4:
       self.headerUi.remove(self.completionLabel)
       self.headerUi.add(self.referOsuDirLabel)
       self.bodyUi.add(self.referOsuDirUi)
@@ -182,7 +185,7 @@ proc switchUi(self:FirstLaunchWindow, nowUi:int, button:string): void =
 
 proc setEvents(self:FirstLaunchWindow): void =
   self.exitButton.onClick = proc(event: ClickEvent) =
-    case self.window.msgBox("Attention", "Do you exit the setup sequence?", "Exit", "Cancel")
+    case self.window.msgBox("Do you exit the setup sequence?", "Attention", "Exit", "Cancel")
       of 1: app.quit()
       else: discard
 
@@ -212,9 +215,9 @@ proc setEvents(self:FirstLaunchWindow): void =
       of 1: app.quit()
       else: discard
 
-proc newApp*(self:FirstLaunchWindow): void =
+proc newApp*(self: FirstLaunchWindow): void =
   let
-    height: int = 200
+    height: int = 205
     width: int = 350
   self.window = newWindow("Set up")
   self.window.height = height
@@ -222,5 +225,3 @@ proc newApp*(self:FirstLaunchWindow): void =
 
   self.setControls()
   self.setEvents()
-
-  self.window.show()
