@@ -1,6 +1,8 @@
 import
   nigui,
   nigui/msgBox,
+  std/os,
+  std/sequtils,
   ./info,
   ./utils,
   ./firstLaunch
@@ -13,9 +15,6 @@ type
     name: string
     ext: string
     path: string
-    ui: LayoutContainer
-    checkBox: Checkbox
-    skinNameLabel: Label
 
 type
   Application = ref object of RootObj
@@ -24,7 +23,8 @@ type
     isShowed: bool # ウィンドウが既に一回表示されたか
 
   ContainsSkinfile = ref object of Application
-    skinfileUi: LayoutContainer # 画面左側UI
+    skinfileUi: LayoutContainer # 左上UI
+    skinfileComboBox: ComboBox
     skinfiles: seq[Skin]
     isSelectedSeq: seq[Skin] # スキンファイルのうち選択されたものを一つ追加
 
@@ -55,7 +55,13 @@ type
     saveLangButton: Button
 
   MainWindow = ref object of ContainsSkinfile
-    menuUi: LayoutContainer # 画面右側UI
+    leftUi: LayoutContainer # 画面左側UI
+    changeLogUi: LayoutContainer # 左下UI
+    beforeTextArea: TextArea
+    centerUi: LayoutContainer
+    arrowLabel: Label
+    afterTextArea: TextArea
+    rightUi: LayoutContainer # 画面右側UI
     topUi: LayoutContainer # 上側UI
     changeCursorButton: Button
     changeHitSoundButton: Button
@@ -73,10 +79,8 @@ type
 proc newApp(self:MainWindow): void
 method createWindow(self:Application, title:string="", height:int=100, width:int=100): void {.base.}
 method showWindow(self:Application): void {.base.}
-method setControls(self:Application): void {.base.} =
-  self.ui = newLayoutContainer(Layout_Horizontal)
-method setEvents(self:Application): void {.base.} =
-  self.window.onCloseClick = proc(event: CloseClickEvent) = discard
+method setControls(self:Application): void {.base.} = discard
+method setEvents(self:Application): void {.base.} = discard
 
 ##################################
 # Implementation #################
@@ -88,8 +92,6 @@ proc main(): void =
   app.init()
   application.newApp()
   application.showWindow()
-  # application.changeCursor.showWindow()
-  # application.setting.showWindow()
   # 初回起動の時の処理
   if loadIsFirstLaunch() == 0:
     var firstLaunch: FirstLaunchWindow = FirstLaunchWindow()
@@ -99,8 +101,8 @@ proc main(): void =
 
 # アプリケーション作成
 proc newApp(self:MainWindow): void =
-  self.createWindow("OsuCursorChanger GUI - "&VERSION, 500, 600)
-  let
+  self.createWindow("OsuCursorChanger GUI - "&VERSION, 400, 600)
+  const
     height: int = 500
     width: int = 500
   self.changeCursor = ChangeCursorWindow()
@@ -122,6 +124,11 @@ proc newApp(self:MainWindow): void =
   self.setting.setControls()
 
   self.setEvents()
+  self.changeCursor.setEvents()
+  self.changeHitSound.setEvents()
+  self.addCursor.setEvents()
+  self.addHitSound.setEvents()
+  self.setting.setEvents()
 
 # ウィンドウ作成
 method createWindow(self:Application, title:string="", height:int=100, width:int=100): void =
@@ -145,15 +152,38 @@ method setControls(self:MainWindow): void =
 
   self.ui = newLayoutContainer(Layout_Horizontal)
 
-  self.skinfileUi = newLayoutContainer(Layout_Vertical)
-  self.skinfileUi.widthMode = WidthMode_Expand
-  self.skinfileUi.heightMode = HeightMode_Expand
-  self.skinfileUi.frame = newFrame()
+  self.leftUi = newLayoutContainer(Layout_Vertical)
+  self.leftUi.heightMode = HeightMode_Expand
+  self.leftUi.widthMode = WidthMode_Expand
 
-  self.menuUi = newLayoutContainer(Layout_Vertical)
-  self.menuUi.heightMode = HeightMode_Expand
-  self.menuUi.width = 150
-  self.menuUi.xAlign = XAlign_Center
+  self.skinfileUi = newLayoutContainer(Layout_Horizontal)
+  self.skinfileUi.widthMode = WidthMode_Expand
+  self.skinfileUi.frame = newFrame("Select skin")
+
+  self.skinfileComboBox = newComboBox()
+  self.skinfileComboBox.widthMode = WidthMode_Expand
+
+  self.changeLogUi = newLayoutContainer(Layout_Horizontal)
+  self.changeLogUi.heightMode = HeightMode_Expand
+  self.changeLogUi.widthMode = WidthMode_Expand
+
+  self.beforeTextArea = newTextArea()
+  self.beforeTextArea.heightMode = HeightMode_Expand
+
+  self.centerUi = newLayoutContainer(Layout_Vertical)
+  self.centerUi.heightMode = HeightMode_Expand
+  self.centerUi.xAlign = XAlign_Center
+  self.centerUi.yAlign = YAlign_Center
+
+  self.arrowLabel = newLabel("->")
+
+  self.afterTextArea = newTextArea()
+  self.afterTextArea.heightMode = HeightMode_Expand
+
+  self.rightUi = newLayoutContainer(Layout_Vertical)
+  self.rightUi.heightMode = HeightMode_Expand
+  self.rightUi.width = 150
+  self.rightUi.xAlign = XAlign_Center
 
   self.topUi = newLayoutContainer(Layout_Vertical)
   self.topUi.widthMode = WidthMode_Expand
@@ -185,12 +215,19 @@ method setControls(self:MainWindow): void =
   self.settingButton.height = buttonHeight
 
   self.window.add(self.ui)
-  self.ui.add(self.skinfileUi)
-  self.ui.add(self.menuUi)
-  self.menuUi.add(self.topUi)
+  self.ui.add(self.leftUi)
+  self.leftUi.add(self.skinfileUi)
+  self.skinfileUi.add(self.skinfileComboBox)
+  self.leftUi.add(self.changeLogUi)
+  self.changeLogUi.add(self.beforeTextArea)
+  self.changeLogUi.add(self.centerUi)
+  self.centerUi.add(self.arrowLabel)
+  self.changeLogUi.add(self.afterTextArea)
+  self.ui.add(self.rightUi)
+  self.rightUi.add(self.topUi)
   self.topUi.add(self.changeCursorButton)
   self.topUi.add(self.changeHitSoundButton)
-  self.menuUi.add(self.bottomUi)
+  self.rightUi.add(self.bottomUi)
   self.bottomUi.add(self.addCursorButton)
   self.bottomUi.add(self.addHitSoundButton)
   self.bottomUi.add(self.settingButton)
@@ -212,6 +249,9 @@ method setControls(self:ToolWindow): void =
   self.skinfileUi.widthMode = WidthMode_Expand
   self.skinfileUi.frame = newFrame()
 
+  self.skinfileComboBox = newComboBox()
+  self.skinfileComboBox.widthMode = WidthMode_Expand
+
   self.buttonUi = newLayoutContainer(Layout_Horizontal)
   self.buttonUi.height = 60
   self.buttonUi.widthMode = WidthMode_Expand
@@ -228,6 +268,7 @@ method setControls(self:ToolWindow): void =
 
   self.window.add(self.ui)
   self.ui.add(self.skinfileUi)
+  self.skinfileUi.add(self.skinfileComboBox)
   self.ui.add(self.buttonUi)
   self.buttonUi.add(self.changeButton)
   self.buttonUi.add(self.cancelButton)
@@ -236,7 +277,9 @@ method setControls(self:ToolWindow): void =
   self.skinfiles = @[]
   self.isSelectedSeq = @[]
 
-  self.window.resizable = false
+  const min: int = 500
+  self.window.minHeight = min
+  self.window.minWidth = min
 
 method setControls(self:SettingWindow): void =
   self.ui = newLayoutContainer(Layout_Vertical)
@@ -282,31 +325,70 @@ method setControls(self:SettingWindow): void =
   self.changeLangUi.add(self.saveLangUi)
   self.saveLangUi.add(self.saveLangButton)
 
-  self.window.resizable = false
+  self.window.minHeight = 230
+  self.window.minWidth = 400
 
 ##################################
 # Implementation - Event Handler #
 ##################################
 method setEvents(self:MainWindow): void =
+  # self.detectSkinfileButton.onClick = proc(event: ClickEvent) =
+  #   let skinDirPath: string = loadPath()
+  #   var files: seq[string] = toSeq(walkDirs(skinDirPath&"/Skins/*"))
+  #   self.setSkinfileControls(files)
+  #   self.detectSkinfileButton.enabled = false
+
+  self.changeCursorButton.onClick = proc(event: ClickEvent) =
+    self.changeCursor.showWindow()
+
+  self.changeHitSoundButton.onClick = proc(event: ClickEvent) =
+    self.changeHitSound.showWindow()
+
+  self.addCursorButton.onClick = proc(event: ClickEvent) =
+    self.addCursor.showWindow()
+
+  self.addHitSoundButton.onClick = proc(event: ClickEvent) =
+    self.addHitSound.showWindow()
+
+  self.settingButton.onClick = proc(event: ClickEvent) =
+    self.setting.showWindow()
+
   self.window.onCloseClick = proc(event: CloseClickEvent) =
     case self.window.msgBox("Quit?", "Quit the applciation", "Quit", "Cancel")
     of 1: app.quit()
     else: discard
 
 method setEvents(self:ChangeCursorWindow): void =
-  discard
+  self.cancelButton.onClick = proc(event: ClickEvent) =
+    self.window.closeClick()
+
+  self.window.onCloseClick = proc(event: CloseClickEvent) =
+    self.window.visible = false
 
 method setEvents(self:ChangeHitSoundWindow): void =
-  discard
+  self.cancelButton.onClick = proc(event: ClickEvent) =
+    self.window.closeClick()
+
+  self.window.onCloseClick = proc(event: CloseClickEvent) =
+    self.window.visible = false
 
 method setEvents(self:AddCursorWindow): void =
-  discard
+  self.cancelButton.onClick = proc(event: ClickEvent) =
+    self.window.closeClick()
+    
+  self.window.onCloseClick = proc(event: CloseClickEvent) =
+    self.window.visible = false
 
 method setEvents(self:AddHitSoundWindow): void =
-  discard
+  self.cancelButton.onClick = proc(event: ClickEvent) =
+    self.window.closeClick()
+
+  self.window.onCloseClick = proc(event: CloseClickEvent) =
+    self.window.visible = false
 
 method setEvents(self:SettingWindow): void =
-  discard
+  self.window.onCloseClick = proc(event: CloseClickEvent) =
+    self.window.visible = false
 
 when isMainModule:
   main()
